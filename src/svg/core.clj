@@ -9,16 +9,18 @@
       [ring.middleware.defaults :refer [wrap-defaults site-defaults]])
     (:use ring.adapter.jetty))
 
-(def conf {:url ""
-           :rest ""
-           :login ""
-           :pwd ""})
+(def conf {:site  ""  ; https://you.myjetbrains.com
+           :url   ""  ; https://you.myjetbrains.com/issue/
+           :rest  ""  ; https://you.myjetbrains.com/rest/issue/
+           :login ""  ; email
+           :pwd   ""  ; pwd
+           })
 
 (def sess (atom []))
 
 
 (defn login [name pwd]
-      (let [response (client/post "https://you.eraga.net/rest/user/login"
+      (let [response (client/post (str (:site conf) "/rest/user/login")
                                   {:content-type :application/x-www-form-urlencoded
                                    :body (str "login=" name "&password=" pwd)})]
         (println :cookies response)

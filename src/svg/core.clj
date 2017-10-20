@@ -11,7 +11,8 @@
     [clojure.string :as str]
     [clojure.edn :as edn]
     [ring.middleware.defaults :refer [wrap-defaults site-defaults]])
-  (:use ring.adapter.jetty))
+  (:use ring.adapter.jetty)
+  (:gen-class))
 
 (defn load-config
       "Given a filename, load & return a config file"
@@ -117,14 +118,21 @@
       [s n]
       (subs s 0 (min (count s) n)))
 
+;(try-render "HSK-2748")
 
 (defn show-row [data]
       (let [tm (transient [])
-            y (atom 30)
-            c (atom 0)]
+            y (atom 60)
+            c (atom 0)
+            done (atom 0)]
         (doseq [d data]
           (swap! y (partial + 30))
           (swap! c (partial + 1))
+
+          (if (= (:state d) (or "Done" "To Merge"))
+            (swap! done (partial + 1))
+            )
+
           (conj! tm (str
                (if (even? @c)
                  (str "<rect x='5' y='" (str (- @y 18)) "' width='800' height='28' fill='gainsboro'/>"))
@@ -134,11 +142,19 @@
                <tspan x='10'>" (:issue d) "</tspan></a>
                <tspan x='90'>" (trunc (:app d) 16) "</tspan>
                <tspan x='220'>" (trunc (:name d) 52) "</tspan>
-               <tspan x='650' " (if (= (:state d) "To Merge") (str "fill='green'")) ">" (:state d) "</tspan>
+               <tspan x='650' "
+               (if (= (:state d) "To Merge") (str "fill='orange'"))
+               (if (= (:state d) "Done") (str "fill='green'"))">" (:state d) "</tspan>
                <tspan x='750'>" (:sp d) "</tspan>
                </text>
                "))
           )
+        (conj! tm (str "<text x='30' y='30' font-size='16px' fill='"
+                       (if (= @done @c) "green" "brown")
+                       "' text-anchor='left'>
+               <tspan x='10'>Progress: " @done "/" @c "</tspan>
+               </text>
+               " ))
         (clojure.string/join (persistent! tm))))
 
 
@@ -146,8 +162,8 @@
       (str "<?xml version='1.0' standalone='no'?>\n<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN'\n'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>\n<svg width='100%' height='100%' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>\n\n<g id='rowGroup' transform='translate(0, 0)'>"
            "<defs>\n    <style type=\"text/css\"><![CDATA[\n      a {\n        fill: darkblue;\n        text-decoration: underline;\n      }\n      a:hover {\n        fill: blue;\n      }\n      a circle, a rect {\n        fill: lightblue;\n        stroke-width: 2px;\n        stroke: green;\n      }\n      \n      a:hover circle, a:hover rect {\n        fill: white;\n        stroke: lightgreen;\n      }\n      \n    ]]></style>\n\t</defs>"
 
-           "<rect x='5' y='13' width='800' height='27' fill='gainsboro'/>
-            <text x='30' y='30' font-size='15px' font-weight='bold' fill='brown' text-anchor='left'>
+           "<rect x='5' y='43' width='800' height='27' fill='gainsboro'/>
+            <text x='30' y='60' font-size='15px' font-weight='bold' fill='brown' text-anchor='left'>
             <tspan x='10'>ID</tspan>
             <tspan x='90'>App</tspan>
             <tspan x='220'>Summary</tspan>

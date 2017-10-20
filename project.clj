@@ -1,8 +1,8 @@
-(defproject svg "0.1.4-SNAPSHOT"
+(defproject svg "0.1.4"
   :description "YouTrack svg builder"
   :url "http://example.com/FIXME"
   :min-lein-version "2.0.0"
-  :main svg.core
+  :main ^:skip-aot svg.core
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [compojure "1.5.1"]
                  [ring/ring-core "1.6.2"]
@@ -13,6 +13,8 @@
   :plugins [[lein-ring "0.12.1"]]
   :ring {:handler svg.core/app-routes}
   :profiles
-  {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
+  {
+   :uberjar {:aot [svg.core]}
+   :dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]]}})
 

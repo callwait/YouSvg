@@ -8,7 +8,8 @@
                  [ring/ring-core "1.6.2"]
                  [ring/ring-jetty-adapter "1.6.2"]
                  [ring/ring-defaults "0.2.1"]
-                 [clj-http "3.7.0"]]
+                 [clj-http "3.7.0"]
+                 [cheshire "5.8.0"]]
   :plugins [[lein-ring "0.12.1"]]
   :ring {:handler svg.core/app-routes}
   :profiles

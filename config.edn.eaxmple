@@ -5,4 +5,6 @@
  :pwd     ""    ; pwd
  :service ""    ; Service id for OAuth2
  :secret  ""    ; secret for Oauth2
+ :oauth2  ""    ; https://you.myjetbrains.com/hub/api/rest/oauth2/token
+ :scope   ""    ;
  }

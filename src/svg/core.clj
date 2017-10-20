@@ -1,8 +1,10 @@
 (ns svg.core
+  (:import java.util.Base64)
   (:require
     [compojure.core :refer :all]
     [compojure.route :as route]
     [clj-http.client :as client]
+    [cheshire.core :refer :all]
     [clojure.xml :as xml]
     [clojure.java.io :as io]
     [clojure.zip :as zip]
@@ -10,7 +12,6 @@
     [clojure.edn :as edn]
     [ring.middleware.defaults :refer [wrap-defaults site-defaults]])
   (:use ring.adapter.jetty))
-
 
 (defn load-config
       "Given a filename, load & return a config file"
@@ -20,6 +21,22 @@
 (def conf (load-config "config.edn"))
 
 (def sess (atom []))
+
+(defn b64 [to-encode]
+      (.encodeToString (Base64/getEncoder) (.getBytes to-encode)))
+
+
+(defn get-token []
+      (let [response (client/post (:oauth2 conf) {
+          :headers {"authorization" (str "Basic " (b64 (str (:service conf) ":" (:secret conf))))}
+          :body (str "grant_type=client_credentials&scope=" (:scope conf))
+          :content-type "application/x-www-form-urlencoded"})]
+        (println (:body response))
+        (parse-string (:body response) true)))
+
+
+(def token (:access_token (get-token)))
+
 
 
 (defn login [name pwd]
@@ -40,6 +57,8 @@
       "download page"
       (:body (client/get url {:cookies @sess})))
 
+(defn fetch-page-by-token [url]
+      (:body (client/get url {:headers {"Authorization" (str "Bearer " (str token))}})))
 
 (defn get-by [xml type name]
       (for [x (xml-seq xml)
@@ -83,7 +102,7 @@
       "Get and parse issues list"
       (let [tm (transient [])]
         (dopar [s sub]
-          (let [resp (parse (fetch-page (str (:rest conf) s)))
+          (let [resp (parse (fetch-page-by-token (str (:rest conf) s)))
                 issue s]
             (conj! tm {:issue issue
                        :name  (first (get-name resp))
@@ -142,7 +161,7 @@
 
 
 (defn try-render [issue]
-      (let [page (parse (fetch-page (str (:rest conf) issue)))
+      (let [page (parse (fetch-page-by-token (str (:rest conf) issue)))
             sub-tasks (get-by page :type "Subtask")
             sub-data (time (parse-subs sub-tasks))]
 
@@ -165,7 +184,7 @@
 (defroutes app-routes
            (GET "/" [] "Youtrack issue->svg mini service")
            (GET "/:id.svg" [id]
-             (make-svg id))
+             (try-render id))
            (route/not-found "Not Found"))
 
 (defn -main []

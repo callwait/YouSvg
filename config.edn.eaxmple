@@ -1,0 +1,8 @@
+{:site    ""    ; https://you.myjetbrains.com
+ :url     ""    ; https://you.myjetbrains.com/issue/
+ :rest    ""    ; https://you.myjetbrains.com/rest/issue/
+ :login   ""    ; email
+ :pwd     ""    ; pwd
+ :service ""    ; Service id for OAuth2
+ :secret  ""    ; secret for Oauth2
+ }

@@ -1,3 +1,8 @@
-# YouTrack text to svg micro service
+# YouTrack micro service with auth by cookies or token
 
-readme will be fixed
+By the given issue we get all the dependencies issues
+
+Parsing data and making svg
+
+
+![alt text](https://raw.githubusercontent.com/callwait/YouSvg/master/resources/public/example.png)

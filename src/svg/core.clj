@@ -118,7 +118,6 @@
       [s n]
       (subs s 0 (min (count s) n)))
 
-;(try-render "HSK-2748")
 
 (defn show-row [data]
       (let [tm (transient [])
